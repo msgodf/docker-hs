@@ -84,7 +84,9 @@ module Docker.Client.Types (
     , addVolume
     , addVolumeFrom
     , DockerVolume(..)
-    , ListVolumesResponse
+    , ListVolumesResponse(..)
+    , ListVolumesOpts(..)
+    , defaultListVolumesOpts
     ) where
 
 import           Data.Aeson          (FromJSON, ToJSON, genericParseJSON,
@@ -119,7 +121,7 @@ data Endpoint =
       -- See note in 'Docker.Client.Api.getContainerLogs' for explanation why.
       | DeleteContainerEndpoint DeleteOpts ContainerID
       | InspectContainerEndpoint ContainerID
-      | ListVolumesEndpoint
+      | ListVolumesEndpoint ListVolumesOpts
     deriving (Eq, Show)
 
 -- | We should newtype this
@@ -301,6 +303,15 @@ data ListOpts = ListOpts { all :: Bool } deriving (Eq, Show)
 -- | Default "ListOpts". Doesn't list stopped containers.
 defaultListOpts :: ListOpts
 defaultListOpts = ListOpts { all=False }
+
+-- | List options used for filtering the list of container or images.
+data ListVolumesOpts = ListVolumesOpts {
+    filters :: HM.HashMap T.Text [T.Text]
+} deriving (Eq, Show)
+
+-- | Default "ListVolumesOpts". No filters.
+defaultListVolumesOpts :: ListVolumesOpts
+defaultListVolumesOpts = ListVolumesOpts { filters=HM.empty }
 
 -- | Data type used for represneting the version of the docker engine
 -- remote API.

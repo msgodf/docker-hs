@@ -147,5 +147,5 @@ getContainerLogs logopts cid = fmap responseBody <$> requestHelper GET (Containe
 -- getContainerLogsStream sink logopts cid = runResourceT $ do
 --  response <- http request manager
 --  responseBody response C.$$+- sink
-listVolumes :: forall m. Monad m => DockerT m (Either DockerError ListVolumesResponse)
-listVolumes = requestHelper GET ListVolumesEndpoint >>= parseResponse
+listVolumes :: forall m. Monad m => ListVolumesOpts -> DockerT m (Either DockerError ListVolumesResponse)
+listVolumes opts = requestHelper GET (ListVolumesEndpoint opts) >>= parseResponse

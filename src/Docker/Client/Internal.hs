@@ -58,8 +58,9 @@ getEndpoint (DeleteContainerEndpoint (DeleteOpts removeVolumes force) cid) =
         where query = [("v", Just (encodeQ $ show removeVolumes)), ("force", Just (encodeQ $ show force))]
 getEndpoint (InspectContainerEndpoint cid) =
             encodeURLWithQuery ["containers", fromContainerID cid, "json"] []
-getEndpoint ListVolumesEndpoint =
-            encodeURL ["volumes"]
+getEndpoint (ListVolumesEndpoint opts) =
+            encodeURLWithQuery ["volumes"] query
+        where query = [("filters", Just $ BSL.toStrict $ JSON.encode (filters opts))]
 
 getEndpointRequestBody :: Endpoint -> Maybe BSL.ByteString
 getEndpointRequestBody VersionEndpoint = Nothing
@@ -75,4 +76,4 @@ getEndpointRequestBody (UnpauseContainerEndpoint _) = Nothing
 getEndpointRequestBody (ContainerLogsEndpoint _ _ _) = Nothing
 getEndpointRequestBody (DeleteContainerEndpoint _ _) = Nothing
 getEndpointRequestBody (InspectContainerEndpoint _) = Nothing
-getEndpointRequestBody ListVolumesEndpoint = Nothing
+getEndpointRequestBody (ListVolumesEndpoint _) = Nothing
