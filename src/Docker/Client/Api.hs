@@ -18,6 +18,7 @@ module Docker.Client.Api (
     , listImages
     -- * Volumes
     , listVolumes
+    , createVolume
     -- * Other
     , getDockerVersion
     ) where
