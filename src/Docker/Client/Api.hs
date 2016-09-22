@@ -149,3 +149,7 @@ getContainerLogs logopts cid = fmap responseBody <$> requestHelper GET (Containe
 --  responseBody response C.$$+- sink
 listVolumes :: forall m. Monad m => ListVolumesOpts -> DockerT m (Either DockerError ListVolumesResponse)
 listVolumes opts = requestHelper GET (ListVolumesEndpoint opts) >>= parseResponse
+
+-- create volume taking no args and returning no information
+createVolume :: forall m. Monad m => DockerT m (Either DockerError ())
+createVolume = requestUnit POST $ CreateVolumeEndpoint

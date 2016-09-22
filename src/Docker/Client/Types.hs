@@ -122,6 +122,7 @@ data Endpoint =
       | DeleteContainerEndpoint DeleteOpts ContainerID
       | InspectContainerEndpoint ContainerID
       | ListVolumesEndpoint ListVolumesOpts
+      | CreateVolumeEndpoint
     deriving (Eq, Show)
 
 -- | We should newtype this
@@ -1462,4 +1463,3 @@ toJsonKeyVal vs getKey getVal = JSON.Object $ foldl f HM.empty vs
 -- | Helper function that return an empty dictionary "{}"
 emptyJsonObject :: JSON.Value
 emptyJsonObject = JSON.Object HM.empty
-
