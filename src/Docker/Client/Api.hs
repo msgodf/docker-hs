@@ -56,12 +56,14 @@ parseResponse :: (FromJSON a, Monad m) => Either DockerError Response -> DockerT
 parseResponse (Left err) =
     return $ Left err
 parseResponse (Right response) =
-    -- Parse request body.
-    case eitherDecode' $ responseBody response of
-        Left err ->
-            return $ Left $ DockerClientDecodeError $ Text.pack err
-        Right r ->
-            return $ Right r
+    do
+        let body = responseBody response
+        -- Parse request body.
+        case eitherDecode' $ body of
+            Left err ->
+                return $ Left $ DockerClientDecodeError $ Text.pack (err ++ (show body))
+            Right r ->
+                return $ Right r
 
 -- | Gets the version of the docker engine remote API.
 getDockerVersion :: forall m. Monad m => DockerT m (Either DockerError DockerVersion)
@@ -145,5 +147,5 @@ getContainerLogs logopts cid = fmap responseBody <$> requestHelper GET (Containe
 -- getContainerLogsStream sink logopts cid = runResourceT $ do
 --  response <- http request manager
 --  responseBody response C.$$+- sink
-listVolumes :: forall m. Monad m => DockerT m (Either DockerError [DockerVolume])
+listVolumes :: forall m. Monad m => DockerT m (Either DockerError ListVolumesResponse)
 listVolumes = requestHelper GET ListVolumesEndpoint >>= parseResponse

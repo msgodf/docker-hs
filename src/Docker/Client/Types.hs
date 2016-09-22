@@ -84,6 +84,7 @@ module Docker.Client.Types (
     , addVolume
     , addVolumeFrom
     , DockerVolume(..)
+    , ListVolumesResponse
     ) where
 
 import           Data.Aeson          (FromJSON, ToJSON, genericParseJSON,
@@ -708,11 +709,22 @@ data DeleteOpts = DeleteOpts {
 defaultDeleteOpts :: DeleteOpts
 defaultDeleteOpts = DeleteOpts { deleteVolumes = False, force = False }
 
+data ListVolumesResponse = ListVolumesResponse {
+      listVolumesVolumes :: [DockerVolume]
+    , listVolumesWarnings :: [Text]
+} deriving(Eq, Show)
+
+instance FromJSON ListVolumesResponse where
+    parseJSON (JSON.Object o) = do
+        dockerVolumes <- o .: "Volumes"
+        dockerVolumeWarnings <- o .: "Warnings" .!= []
+        return $ ListVolumesResponse dockerVolumes dockerVolumeWarnings
+    parseJSON _ = fail "Failed to parse ListVolumesResponse."
+
 data DockerVolume = DockerVolume {
     dockerVolumeName :: Text
   , dockerVolumeDriver :: Text
   , dockerVolumeMountpoint :: Text
-  , dockerVolumeLabels :: [Label]
   , dockerVolumeScope :: Text
 } deriving(Eq, Show)
 
@@ -721,9 +733,8 @@ instance FromJSON DockerVolume where
         dockerVolumeName <- o .: "Name"
         dockerVolumeDriver <- o .: "Driver"
         dockerVolumeMountpoint <- o .: "Mountpoint"
-        dockerVolumeLabels <- o .:? "Labels" .!= []
         dockerVolumeScope <- o .: "Scope"
-        return $ DockerVolume dockerVolumeName dockerVolumeDriver dockerVolumeMountpoint dockerVolumeLabels dockerVolumeScope
+        return $ DockerVolume dockerVolumeName dockerVolumeDriver dockerVolumeMountpoint dockerVolumeScope
     parseJSON _ = fail "Failed to parse Volume."
 
 -- | Timestamp alias.
