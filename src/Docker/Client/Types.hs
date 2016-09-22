@@ -1,6 +1,8 @@
 {-# LANGUAGE RecordWildCards     #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
+-- These should mirror those in https://github.com/docker/docker/blob/master/api/types/types.go
+-- I'm not sure why field accessors collide :( it's not nice to have to give them silly names
 module Docker.Client.Types (
       Endpoint(..)
     , URL
@@ -87,6 +89,7 @@ module Docker.Client.Types (
     , ListVolumesResponse(..)
     , ListVolumesOpts(..)
     , defaultListVolumesOpts
+    , VolumeCreateRequest(..)
     ) where
 
 import           Data.Aeson          (FromJSON, ToJSON, genericParseJSON,
@@ -119,10 +122,10 @@ data Endpoint =
       | UnpauseContainerEndpoint ContainerID
       | ContainerLogsEndpoint LogOpts Bool ContainerID -- ^ Second argument (Bool) is whether to follow which is currently hardcoded to False.
       -- See note in 'Docker.Client.Api.getContainerLogs' for explanation why.
-      | DeleteContainerEndpoint DeleteOpts ContainerID
+v      | DeleteContainerEndpoint DeleteOpts ContainerID
       | InspectContainerEndpoint ContainerID
       | ListVolumesEndpoint ListVolumesOpts
-      | CreateVolumeEndpoint
+      | CreateVolumeEndpoint VolumeCreateRequest
     deriving (Eq, Show)
 
 -- | We should newtype this
@@ -748,6 +751,19 @@ instance FromJSON DockerVolume where
         dockerVolumeScope <- o .: "Scope"
         return $ DockerVolume dockerVolumeName dockerVolumeDriver dockerVolumeMountpoint dockerVolumeScope
     parseJSON _ = fail "Failed to parse Volume."
+
+
+data VolumeCreateRequest = VolumeCreateRequest {
+    volumeCreateRequestName :: Text -- Name is the requested name of the volume
+  , volumeCreateRequestDriver :: Text -- Driver is the name of the driver that should be used to create the volume
+--  , volumeCreateRequestDriverOpts :: HM.HashMap Text Text -- DriverOpts holds the driver specific options to use for when creating the volume.
+  , volumeCreateRequestLabels :: [Label] -- Labels holds metadata specific to the volume being created.
+} deriving(Eq, Show, Generic)
+
+ -- Remove the prefix when serializing to JSON
+instance ToJSON VolumeCreateRequest where
+    toJSON =  genericToJSON defaultOptions {
+        fieldLabelModifier = drop 19}
 
 -- | Timestamp alias.
 type Timestamp = Integer

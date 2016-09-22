@@ -234,7 +234,7 @@ statusCodeToError (ListVolumesEndpoint _) st =
         Nothing
     else
         Just $ DockerInvalidStatusCode st
-statusCodeToError CreateVolumeEndpoint st =
+statusCodeToError (CreateVolumeEndpoint _) st =
   if st == status200 then
     Nothing
   else

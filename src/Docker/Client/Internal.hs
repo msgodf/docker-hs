@@ -61,7 +61,7 @@ getEndpoint (InspectContainerEndpoint cid) =
 getEndpoint (ListVolumesEndpoint opts) =
             encodeURLWithQuery ["volumes"] query
         where query = [("filters", Just $ BSL.toStrict $ JSON.encode (filters opts))]
-getEndpoint CreateVolumeEndpoint =
+getEndpoint (CreateVolumeEndpoint _) =
   encodeURL ["volumes", "create"]
 
 getEndpointRequestBody :: Endpoint -> Maybe BSL.ByteString
@@ -79,4 +79,4 @@ getEndpointRequestBody (ContainerLogsEndpoint _ _ _) = Nothing
 getEndpointRequestBody (DeleteContainerEndpoint _ _) = Nothing
 getEndpointRequestBody (InspectContainerEndpoint _) = Nothing
 getEndpointRequestBody (ListVolumesEndpoint _) = Nothing
-getEndpointRequestBody CreateVolumeEndpoint = Nothing
+getEndpointRequestBody (CreateVolumeEndpoint opts) = Just $ JSON.encode opts
