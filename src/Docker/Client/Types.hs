@@ -83,6 +83,7 @@ module Docker.Client.Types (
     , addLink
     , addVolume
     , addVolumeFrom
+    , DockerVolume(..)
     ) where
 
 import           Data.Aeson          (FromJSON, ToJSON, genericParseJSON,
@@ -117,6 +118,7 @@ data Endpoint =
       -- See note in 'Docker.Client.Api.getContainerLogs' for explanation why.
       | DeleteContainerEndpoint DeleteOpts ContainerID
       | InspectContainerEndpoint ContainerID
+      | ListVolumesEndpoint
     deriving (Eq, Show)
 
 -- | We should newtype this
@@ -705,6 +707,24 @@ data DeleteOpts = DeleteOpts {
 -- running.
 defaultDeleteOpts :: DeleteOpts
 defaultDeleteOpts = DeleteOpts { deleteVolumes = False, force = False }
+
+data DockerVolume = DockerVolume {
+    dockerVolumeName :: Text
+  , dockerVolumeDriver :: Text
+  , dockerVolumeMountpoint :: Text
+  , dockerVolumeLabels :: [Label]
+  , dockerVolumeScope :: Text
+} deriving(Eq, Show)
+
+instance FromJSON DockerVolume where
+    parseJSON (JSON.Object o) = do
+        dockerVolumeName <- o .: "Name"
+        dockerVolumeDriver <- o .: "Driver"
+        dockerVolumeMountpoint <- o .: "Mountpoint"
+        dockerVolumeLabels <- o .:? "Labels" .!= []
+        dockerVolumeScope <- o .: "Scope"
+        return $ DockerVolume dockerVolumeName dockerVolumeDriver dockerVolumeMountpoint dockerVolumeLabels dockerVolumeScope
+    parseJSON _ = fail "Failed to parse Volume."
 
 -- | Timestamp alias.
 type Timestamp = Integer

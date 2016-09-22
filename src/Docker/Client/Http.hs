@@ -229,5 +229,11 @@ statusCodeToError (InspectContainerEndpoint _) st =
         Nothing
     else
         Just $ DockerInvalidStatusCode st
+statusCodeToError ListVolumesEndpoint st =
+    if st == status200 then
+        Nothing
+    else
+        Just $ DockerInvalidStatusCode st
+
 
 

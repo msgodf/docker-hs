@@ -16,6 +16,8 @@ module Docker.Client.Api (
     , getContainerLogs
     -- * Images
     , listImages
+    -- * Volumes
+    , listVolumes
     -- * Other
     , getDockerVersion
     ) where
@@ -143,4 +145,5 @@ getContainerLogs logopts cid = fmap responseBody <$> requestHelper GET (Containe
 -- getContainerLogsStream sink logopts cid = runResourceT $ do
 --  response <- http request manager
 --  responseBody response C.$$+- sink
-
+listVolumes :: forall m. Monad m => DockerT m (Either DockerError [DockerVolume])
+listVolumes = requestHelper GET ListVolumesEndpoint >>= parseResponse
