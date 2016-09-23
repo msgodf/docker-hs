@@ -90,6 +90,8 @@ module Docker.Client.Types (
     , ListVolumesOpts(..)
     , defaultListVolumesOpts
     , VolumeCreateRequest(..)
+    , defaultVolumeCreateRequest
+    , setVolumeCreateRequestName
     ) where
 
 import           Data.Aeson          (FromJSON, ToJSON, genericParseJSON,
@@ -122,7 +124,7 @@ data Endpoint =
       | UnpauseContainerEndpoint ContainerID
       | ContainerLogsEndpoint LogOpts Bool ContainerID -- ^ Second argument (Bool) is whether to follow which is currently hardcoded to False.
       -- See note in 'Docker.Client.Api.getContainerLogs' for explanation why.
-v      | DeleteContainerEndpoint DeleteOpts ContainerID
+      | DeleteContainerEndpoint DeleteOpts ContainerID
       | InspectContainerEndpoint ContainerID
       | ListVolumesEndpoint ListVolumesOpts
       | CreateVolumeEndpoint VolumeCreateRequest
@@ -755,15 +757,25 @@ instance FromJSON DockerVolume where
 
 data VolumeCreateRequest = VolumeCreateRequest {
     volumeCreateRequestName :: Text -- Name is the requested name of the volume
-  , volumeCreateRequestDriver :: Text -- Driver is the name of the driver that should be used to create the volume
+  , volumeCreateRequestDriver :: Maybe Text -- Driver is the name of the driver that should be used to create the volume
 --  , volumeCreateRequestDriverOpts :: HM.HashMap Text Text -- DriverOpts holds the driver specific options to use for when creating the volume.
-  , volumeCreateRequestLabels :: [Label] -- Labels holds metadata specific to the volume being created.
+  , volumeCreateRequestLabels :: Maybe [Label] -- Labels holds metadata specific to the volume being created.
 } deriving(Eq, Show, Generic)
 
  -- Remove the prefix when serializing to JSON
 instance ToJSON VolumeCreateRequest where
     toJSON =  genericToJSON defaultOptions {
         fieldLabelModifier = drop 19}
+
+defaultVolumeCreateRequest :: Text -> VolumeCreateRequest
+defaultVolumeCreateRequest volumeName = VolumeCreateRequest {
+    volumeCreateRequestName=volumeName
+  , volumeCreateRequestDriver=Just "local"
+  , volumeCreateRequestLabels=Just []
+}
+
+setVolumeCreateRequestName :: Text -> VolumeCreateRequest -> VolumeCreateRequest
+setVolumeCreateRequestName name vcr = vcr{volumeCreateRequestName=name}
 
 -- | Timestamp alias.
 type Timestamp = Integer

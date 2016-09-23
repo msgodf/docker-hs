@@ -152,5 +152,5 @@ listVolumes :: forall m. Monad m => ListVolumesOpts -> DockerT m (Either DockerE
 listVolumes opts = requestHelper GET (ListVolumesEndpoint opts) >>= parseResponse
 
 -- create volume taking no args and returning no information
-createVolume :: forall m. Monad m => VolumeCreateRequest -> DockerT m (Either DockerError ())
-createVolume req = requestUnit POST $ CreateVolumeEndpoint req
+createVolume :: forall m. Monad m => VolumeCreateRequest -> DockerT m (Either DockerError DockerVolume)
+createVolume req = requestHelper POST (CreateVolumeEndpoint req) >>= parseResponse
