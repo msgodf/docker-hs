@@ -104,8 +104,7 @@ httpHandler :: MonadIO m => HTTP.Manager -> HttpHandler m
 httpHandler manager request = liftIO $ do
     try (httpLbs request manager) >>= \res -> case res of
         Right res                              -> return $ Right res
-        Left HTTP.FailedConnectionException{}  -> return $ Left DockerConnectionError
-        Left HTTP.FailedConnectionException2{} -> return $ Left DockerConnectionError
+        Left (HTTP.HttpExceptionRequest _ ec)  -> return $ Left $ GenericDockerError (T.pack $ show ec) -- DockerConnectionError
         Left e                                 -> return $ Left $ GenericDockerError (T.pack $ show e)
 
 -- | Connect to a unix domain socket (the default docker socket is
